@@ -26,7 +26,7 @@ Ruhoh.Urls = {
     
     // My Post Title ===> my-post-title
     to_slug: function (title) {
-        title = title.toString().toLowerCase();
+        title = title.toString().toLowerCase().replace(/\W+/g,'-'); // TODO: Not fully correct replacement for /[^\p{Word}+]/u
         return title.replace(/^\-+/g, '').replace(/\-+$/g, '').replace(/\-+/g, '-');
     }
 }
