@@ -106,7 +106,7 @@ ruhoh_cms = {
             } else {
                 msg = [].join.call(arguments," ");
             }
-            this.element.prepend("<div style='"+style+"'>"+msg+"</div>");
+            this.element.append("<div style='"+style+"'>"+msg+"</div>");
         }
     });    
 })(teacss.jQuery);

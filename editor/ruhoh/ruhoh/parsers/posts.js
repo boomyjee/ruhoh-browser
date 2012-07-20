@@ -44,7 +44,10 @@ Ruhoh.Parsers.Posts = {
           
             data['date'] = data['date'] || filename_data['date'];
             
-            if (!this.formatted_date(data['date'])) {
+            if (data['date'] instanceof Date) {
+                data['date'] = data['date'].toString("yyyy-MM-dd");
+            } 
+            else if (!this.formatted_date(data['date'])) {
                 var error = "Invalid Date Format. Date should be: YYYY-MM-DD"
                 invalid.push([filename, error]);
                 continue;
