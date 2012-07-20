@@ -1,20 +1,11 @@
 Ruhoh.Templaters.RMustache = {
-    render: function (tpl,view) {
-        var me = this;
-        var key;
-        for (key in Ruhoh.Templaters.AssetHelpers)
-            view[key] = Ruhoh.Templaters.AssetHelpers[key];
-        
-        for (key in Ruhoh.Templaters.BaseHelpers)
-            view[key] = Ruhoh.Templaters.BaseHelpers[key];
-        
-        view['context'] = view;
-        
-        var extra = {
+    
+    context: function () {
+        var view = {
             content: function () {
                 var pc = this.get_page_content();
                 var content = pc[0], id = pc[1];
-                var content = me.render(content,view);
+                var content = Ruhoh.Templaters.RMustache.render(content,this.context);
                 return Ruhoh.Converter.convert(content, id);
             },
             
@@ -31,14 +22,37 @@ Ruhoh.Templaters.RMustache = {
             widget: function(name) {
                 if (this.context['page'][name.toString()].toString() == 'false') return '';
                 return Ruhoh.DB.widgets[name.toString()]['layout'];
-            }
+            }            
+        };
+        
+        var key;
+        for (key in Ruhoh.Templaters.AssetHelpers)
+            view[key] = Ruhoh.Templaters.AssetHelpers[key];
+        
+        for (key in Ruhoh.Templaters.BaseHelpers)
+            view[key] = Ruhoh.Templaters.BaseHelpers[key];
+        
+        for (key in view) {
+            var f = view[key];
+            (function(f){
+                view[key] = function () {
+                    if (this==view) {
+                        return f.apply(view,arguments); 
+                    } else {
+                        view.context = this;
+                        return f.apply(view,arguments); 
+                    }
+                }
+            })(f);
         }
-            
-        for (key in extra) 
-            view[key] = extra[key];
         
-        var ctx = Mustache.Context.make(view);
-        
+        return new Mustache.Context(view);
+    },
+    
+    render: function (tpl,view) {
+        if (!this.top_context) this.top_context = this.context();
+
+        var ctx = new Mustache.Context(view,this.top_context);
         ctx.lookup = function (name) {
             var sup = Mustache.Context.prototype.lookup;
             if (name.toString().indexOf("?")==-1) return sup.call(this,name);
@@ -53,7 +67,6 @@ Ruhoh.Templaters.RMustache = {
             else
                 return context;
         }
-            
         return Mustache.render(tpl,ctx,Ruhoh.DB.partials);
     }
 }
