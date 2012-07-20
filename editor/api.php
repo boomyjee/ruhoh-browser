@@ -1,7 +1,7 @@
 <?php
 if (!isset($_POST['type'])) return;
     
-require "../../dayside/server/api.php";
+require "../dayside/server/api.php";
 
 class RuhohApi extends FileApi {
     function __construct() {
@@ -11,7 +11,7 @@ class RuhohApi extends FileApi {
         if (isset($_POST['password']))
             setcookie('editor_auth',$test = md5($_POST['password'].$salt),0,'/');
         else
-            $test = $_COOKIE['editor_auth'];
+            $test = isset($_COOKIE['editor_auth']) ? $_COOKIE['editor_auth'] : null ;
         
         if ($test!=md5($password.$salt)) { echo "auth_error"; die(); } 
         $this->{$_POST['type']}();
@@ -34,23 +34,29 @@ class RuhohApi extends FileApi {
         return false;
     }
     
-    function batch() {
+    function batch()
+    {
         $res = array();
         $url = $_POST['path'];
         $path = $this->_pathFromUrl($url);
-        
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($path,\RecursiveDirectoryIterator::SKIP_DOTS),\RecursiveIteratorIterator::CHILD_FIRST);
-        foreach ($iterator as $sub) {
-            $sub_path = $sub->__toString();
-            $sub_url = str_replace($path,$url,$sub_path);
-            if ($sub->isDir()) {
-                $res[$sub_url] = array('directory'=>true);
-            } else {
-                $res[$sub_url] = array('content'=>file_get_contents($sub_path));
+        try {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS), \RecursiveIteratorIterator::CHILD_FIRST);
+            foreach ($iterator as $sub) {
+                $sub_path = $sub->__toString();
+                $sub_url = str_replace($path, $url, $sub_path);
+                if ($sub->isDir()) {
+                    $res[$sub_url] = array('directory' => true);
+                } else {
+                    if (in_array(pathinfo($sub_path, PATHINFO_EXTENSION),["","md","htm","html","yml","css","js"])) {
+                        $res[$sub_url] = array('content' => file_get_contents($sub_path));
+                    }
+                }
             }
+            echo json_encode($res);
+        } catch (\Exception $e) {
+           file_put_contents('./error.log',$path .PHP_EOL. $e->getMessage(). PHP_EOL );
         }
-        echo json_encode($res);
     }
 }
 
