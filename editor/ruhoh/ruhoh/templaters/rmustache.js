@@ -52,6 +52,7 @@ Ruhoh.Templaters.RMustache = {
     render: function (tpl,view) {
         if (!this.top_context) this.top_context = this.context();
 
+        var me = this;
         var ctx = new Mustache.Context(view,this.top_context);
         ctx.lookup = function (name) {
             var sup = Mustache.Context.prototype.lookup;
@@ -62,8 +63,9 @@ Ruhoh.Templaters.RMustache = {
             var helper = parts[1];
             
             context = sup.call(this,context);
-            if (this.view[helper]) 
-                return this.view[helper].call(this.view,context);
+
+            if (me.top_context.view[helper]) 
+                return me.top_context.view[helper].call(this.view,context);
             else
                 return context;
         }
