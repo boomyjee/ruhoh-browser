@@ -71,6 +71,7 @@ Ruhoh.Parsers.Posts = {
     },
         
     formatted_date: function (date) {
+        if (date instanceof Date) return date;
         try {
             return new Date(date.replace(/(\d+)-(\d+)-(\d+)/, '$2/$3/$1'));
         } catch (e) {
@@ -157,7 +158,7 @@ Ruhoh.Parsers.Posts = {
         var filename = FileUtils.basename(post['id'], FileUtils.extname(post['id']));
         
         var category = new Array(post['categories'])[0];
-        if (category) category = category.split('/').map(Ruhoh.Urls.to_url_slug).join('/');
+        if (category!="") category = category.split('/').map(Ruhoh.Urls.to_url_slug).join('/');
         
         var hash = {
             "year"       : date.getFullYear(),
@@ -231,7 +232,7 @@ Ruhoh.Parsers.Posts = {
         
         for (var i=0;i<ordered_posts.length;i++) {
             var post = ordered_posts[i];
-            for (var t=0;t<post['tags'].length;t++) {
+            if (post.tags) for (var t=0;t<post['tags'].length;t++) {
                 var tag = post.tags[t];
                 if (tags[tag])
                     tags[tag]['count'] += 1
@@ -253,7 +254,7 @@ Ruhoh.Parsers.Posts = {
         
         for (var i=0;i<ordered_posts.length;i++) {
             var post = ordered_posts[i];
-            for (var c=0;c<post.categories.length;c++) {
+            if (post.categories) for (var c=0;c<post.categories.length;c++) {
                 var cat = post.categories[c];
                 cat = cat.join('/');
                 if (categories[cat])
