@@ -1,0 +1,23 @@
+@append "../../dayside/client/dayside.css";
+@append "../../teacss-ui/lib/teacss-ui.css";
+
+Script {
+    @append "../../teacss-ui/lib/teacss-ui.js";
+
+    @append "../../dayside/client/dayside.js";
+
+    @append "lib/yaml.js";
+    @append "lib/showdown.js";
+    @append "lib/mustache.js";
+    
+    @import "ruhoh/makefile.tea";
+    
+    @import "dayside-plugin/plugin.tea";
+    
+    @append {
+        dayside({
+            root: teacss.path.absolute("../blog"),
+            ajax_url: teacss.path.absolute("api.php")
+        });
+    }
+}
